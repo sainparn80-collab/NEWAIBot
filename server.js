@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = "26ef5347ec0e452392ef217536dc87cf";
+const API_KEY = "9f5b507c40b44025a963bbaf95414d65";
 
 // 🔐 Fake DB
 let validKeys = ["VIP123", "PRO456"];
