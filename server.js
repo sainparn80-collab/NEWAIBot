@@ -6,10 +6,20 @@ const app = express();
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = "9f5b507c40b44025a963bbaf95414d65";
 
-// 🔐 Fake DB
+// 🔑 ADD YOUR 3 API KEYS HERE
+const API_KEYS = [
+  "API_KEY_1",
+  "API_KEY_2",
+  "API_KEY_3"
+];
+
+// 🔐 License keys
 let validKeys = ["VIP123", "PRO456"];
+
+// 📦 CACHE
+let cache = null;
+let lastFetch = 0;
 
 // EMA
 function EMA(prices, period) {
@@ -24,13 +34,11 @@ function EMA(prices, period) {
 // RSI
 function RSI(prices, period = 14) {
   let gains = 0, losses = 0;
-
   for (let i = 1; i <= period; i++) {
     let diff = prices[i] - prices[i - 1];
     if (diff >= 0) gains += diff;
     else losses -= diff;
   }
-
   let rs = gains / losses || 1;
   return 100 - (100 / (1 + rs));
 }
@@ -44,24 +52,42 @@ function checkKey(req, res, next) {
   next();
 }
 
+// 🔄 Fetch with fallback keys
+async function fetchData(symbol) {
+  for (let key of API_KEYS) {
+    try {
+      const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${key}`;
+      const res = await axios.get(url);
+
+      if (res.data && res.data.values) {
+        return res.data;
+      }
+
+    } catch (err) {
+      continue;
+    }
+  }
+  return null;
+}
+
 // 🚀 SIGNAL API
 app.get("/signal", checkKey, async (req, res) => {
   try {
     let symbol = req.query.symbol || "EUR/USD";
-
-    // 🔥 FIX: remove slash
     symbol = symbol.replace("/", "");
 
-    const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${API_KEY}`;
-
-    const response = await axios.get(url);
-
-    // 🔥 SAFE CHECK
-    if (!response.data || !response.data.values) {
-      return res.json({ error: "API limit reached or invalid key" });
+    // 🔥 CACHE (10 sec)
+    if (Date.now() - lastFetch < 10000 && cache) {
+      return res.json(cache);
     }
 
-    const closes = response.data.values.map(c => parseFloat(c.close)).reverse();
+    const data = await fetchData(symbol);
+
+    if (!data || !data.values) {
+      return res.json({ error: "All API keys failed" });
+    }
+
+    const closes = data.values.map(c => parseFloat(c.close)).reverse();
 
     if (closes.length < 20) {
       return res.json({ error: "Not enough data" });
@@ -81,11 +107,17 @@ app.get("/signal", checkKey, async (req, res) => {
       signal = "DOWN 📉";
     }
 
-    res.json({ signal, rsi, price, trend });
+    const result = { signal, rsi, price, trend };
+
+    // 💾 Save cache
+    cache = result;
+    lastFetch = Date.now();
+
+    res.json(result);
 
   } catch (err) {
     console.log("ERROR:", err.message);
-    res.json({ error: "Server error or API issue" });
+    res.json({ error: "Server error" });
   }
 });
 
