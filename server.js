@@ -7,17 +7,10 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
-// 🔑 MULTIPLE API KEYS
-const API_KEYS = [
-  "9f5b507c40b44025a963bbaf95414d65",
-  "6460e5c6e8544998b96bea95fb9518b9",
-  "19df026300c34d19ab38381c6b9ccc0c"
-];
-
-// 🔐 License
+// 🔐 License keys
 let validKeys = ["VIP123", "PRO456"];
 
-// 📦 CACHE SYSTEM
+// 📦 CACHE
 let cache = null;
 let lastFetch = 0;
 
@@ -52,51 +45,20 @@ function checkKey(req, res, next) {
   next();
 }
 
-// 🔄 Smart Fetch System
-async function fetchData(symbol) {
-  for (let key of API_KEYS) {
-    try {
-      console.log("Trying key:", key);
-
-      const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${key}`;
-      const res = await axios.get(url);
-
-      if (res.data.code) {
-        console.log("Failed:", res.data.message);
-        continue;
-      }
-
-      if (res.data.values) {
-        console.log("Success key:", key);
-        return res.data;
-      }
-
-    } catch (err) {
-      console.log("Error key:", key);
-      continue;
-    }
-  }
-  return null;
-}
-
 // 🚀 SIGNAL API
 app.get("/signal", checkKey, async (req, res) => {
   try {
-    let symbol = req.query.symbol || "EUR/USD";
-    symbol = symbol.replace("/", "");
+    let symbol = req.query.symbol || "BTCUSDT";
 
-    // 🔥 CACHE (15 sec)
-    if (Date.now() - lastFetch < 15000 && cache) {
+    // 🔥 CACHE (10 sec)
+    if (Date.now() - lastFetch < 10000 && cache) {
       return res.json(cache);
     }
 
-    const data = await fetchData(symbol);
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=50`;
+    const response = await axios.get(url);
 
-    if (!data) {
-      return res.json({ error: "All APIs failed" });
-    }
-
-    const closes = data.values.map(c => parseFloat(c.close)).reverse();
+    const closes = response.data.map(c => parseFloat(c[4]));
 
     const ema10 = EMA(closes, 10);
     const ema20 = EMA(closes, 20);
@@ -106,7 +68,7 @@ app.get("/signal", checkKey, async (req, res) => {
     let trend = ema10 > ema20 ? "UP" : "DOWN";
     let signal = "WAIT";
 
-    // 🔥 IMPROVED LOGIC
+    // 🔥 STRONG LOGIC
     if (trend === "UP" && rsi < 45 && price > ema10) {
       signal = "UP 📈";
     } else if (trend === "DOWN" && rsi > 55 && price < ema10) {
@@ -122,13 +84,13 @@ app.get("/signal", checkKey, async (req, res) => {
 
   } catch (err) {
     console.log(err.message);
-    res.json({ error: "Server error" });
+    res.json({ error: "Binance API error" });
   }
 });
 
 // Home
 app.get("/", (req, res) => {
-  res.send("AI Signal Bot PRO Running 🚀");
+  res.send("Binance Signal Bot Running 🚀");
 });
 
 app.listen(PORT, () => {
