@@ -7,10 +7,8 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
-// 🔐 License keys
 let validKeys = ["VIP123", "PRO456"];
 
-// 📦 CACHE
 let cache = null;
 let lastFetch = 0;
 
@@ -36,7 +34,7 @@ function RSI(prices, period = 14) {
   return 100 - (100 / (1 + rs));
 }
 
-// 🔐 License check
+// License
 function checkKey(req, res, next) {
   const key = req.query.key;
   if (!validKeys.includes(key)) {
@@ -45,18 +43,26 @@ function checkKey(req, res, next) {
   next();
 }
 
-// 🚀 SIGNAL API
+// SIGNAL API
 app.get("/signal", checkKey, async (req, res) => {
   try {
     let symbol = req.query.symbol || "BTCUSDT";
 
-    // 🔥 CACHE (10 sec)
+    // 🔥 FIX: remove slash if exists
+    symbol = symbol.replace("/", "");
+
+    // CACHE
     if (Date.now() - lastFetch < 10000 && cache) {
       return res.json(cache);
     }
 
     const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=50`;
     const response = await axios.get(url);
+
+    // 🔥 ERROR HANDLE
+    if (!Array.isArray(response.data)) {
+      return res.json({ error: "Invalid Binance response" });
+    }
 
     const closes = response.data.map(c => parseFloat(c[4]));
 
@@ -68,7 +74,6 @@ app.get("/signal", checkKey, async (req, res) => {
     let trend = ema10 > ema20 ? "UP" : "DOWN";
     let signal = "WAIT";
 
-    // 🔥 STRONG LOGIC
     if (trend === "UP" && rsi < 45 && price > ema10) {
       signal = "UP 📈";
     } else if (trend === "DOWN" && rsi > 55 && price < ema10) {
@@ -83,14 +88,13 @@ app.get("/signal", checkKey, async (req, res) => {
     res.json(result);
 
   } catch (err) {
-    console.log(err.message);
+    console.log("BINANCE ERROR:", err.message);
     res.json({ error: "Binance API error" });
   }
 });
 
-// Home
 app.get("/", (req, res) => {
-  res.send("Binance Signal Bot Running 🚀");
+  res.send("Binance Bot Running 🚀");
 });
 
 app.listen(PORT, () => {
