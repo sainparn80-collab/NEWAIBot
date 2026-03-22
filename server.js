@@ -56,17 +56,28 @@ function checkKey(req, res, next) {
 async function fetchData(symbol) {
   for (let key of API_KEYS) {
     try {
+      console.log("Trying key:", key);
+
       const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${key}`;
       const res = await axios.get(url);
 
+      // 🔥 HANDLE API ERROR RESPONSE
+      if (res.data.code) {
+        console.log("Key failed:", key, res.data.message);
+        continue;
+      }
+
       if (res.data && res.data.values) {
+        console.log("Key working:", key);
         return res.data;
       }
 
     } catch (err) {
+      console.log("Error with key:", key);
       continue;
     }
   }
+
   return null;
 }
 
