@@ -78,6 +78,6 @@ app.get("/signal", checkKey, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log("Server running...");
+app.get("/", (req, res) => {
+  res.send("AI Signal Bot Backend Running 🚀");
 });
