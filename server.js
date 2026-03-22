@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // 🔑 MULTIPLE API KEYS
 const API_KEYS = [
-  "47314015f23043a784b5f5edc8e3acd4",
+  "9f5b507c40b44025a963bbaf95414d65",
   "6460e5c6e8544998b96bea95fb9518b9",
   "19df026300c34d19ab38381c6b9ccc0c"
 ];
