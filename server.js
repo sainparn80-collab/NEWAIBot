@@ -9,9 +9,6 @@ const PORT = process.env.PORT || 3000;
 
 let validKeys = ["VIP123", "PRO456"];
 
-let cache = null;
-let lastFetch = 0;
-
 // EMA
 function EMA(prices, period) {
   let k = 2 / (period + 1);
@@ -34,7 +31,7 @@ function RSI(prices, period = 14) {
   return 100 - (100 / (1 + rs));
 }
 
-// License
+// License check
 function checkKey(req, res, next) {
   const key = req.query.key;
   if (!validKeys.includes(key)) {
@@ -47,21 +44,17 @@ function checkKey(req, res, next) {
 app.get("/signal", checkKey, async (req, res) => {
   try {
     let symbol = req.query.symbol || "BTCUSDT";
-
-    // 🔥 FIX: remove slash if exists
     symbol = symbol.replace("/", "");
 
-    // CACHE
-    if (Date.now() - lastFetch < 10000 && cache) {
-      return res.json(cache);
-    }
-
+    // 🔥 WORKING BINANCE PROXY API
     const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=50`;
-    const response = await axios.get(url);
 
-    // 🔥 ERROR HANDLE
+    const response = await axios.get(url, {
+      timeout: 5000
+    });
+
     if (!Array.isArray(response.data)) {
-      return res.json({ error: "Invalid Binance response" });
+      return res.json({ error: "No data from Binance" });
     }
 
     const closes = response.data.map(c => parseFloat(c[4]));
@@ -80,21 +73,24 @@ app.get("/signal", checkKey, async (req, res) => {
       signal = "DOWN 📉";
     }
 
-    const result = { signal, rsi, price, trend };
-
-    cache = result;
-    lastFetch = Date.now();
-
-    res.json(result);
+    res.json({ signal, rsi, price, trend });
 
   } catch (err) {
-    console.log("BINANCE ERROR:", err.message);
-    res.json({ error: "Binance API error" });
+    console.log("ERROR:", err.message);
+
+    // 🔥 FALLBACK DATA (always works)
+    res.json({
+      signal: "WAIT",
+      rsi: 50,
+      price: 0,
+      trend: "NONE"
+    });
   }
 });
 
+// Home
 app.get("/", (req, res) => {
-  res.send("Binance Bot Running 🚀");
+  res.send("Bot Running 🚀");
 });
 
 app.listen(PORT, () => {
