@@ -7,17 +7,17 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
-// 🔑 ADD YOUR 3 API KEYS HERE
+// 🔑 MULTIPLE API KEYS
 const API_KEYS = [
-  "19df026300c34d19ab38381c6b9ccc0c",
+  "47314015f23043a784b5f5edc8e3acd4",
   "6460e5c6e8544998b96bea95fb9518b9",
-  "47314015f23043a784b5f5edc8e3acd4"
+  "19df026300c34d19ab38381c6b9ccc0c"
 ];
 
-// 🔐 License keys
+// 🔐 License
 let validKeys = ["VIP123", "PRO456"];
 
-// 📦 CACHE
+// 📦 CACHE SYSTEM
 let cache = null;
 let lastFetch = 0;
 
@@ -52,7 +52,7 @@ function checkKey(req, res, next) {
   next();
 }
 
-// 🔄 Fetch with fallback keys
+// 🔄 Smart Fetch System
 async function fetchData(symbol) {
   for (let key of API_KEYS) {
     try {
@@ -61,23 +61,21 @@ async function fetchData(symbol) {
       const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${key}`;
       const res = await axios.get(url);
 
-      // 🔥 HANDLE API ERROR RESPONSE
       if (res.data.code) {
-        console.log("Key failed:", key, res.data.message);
+        console.log("Failed:", res.data.message);
         continue;
       }
 
-      if (res.data && res.data.values) {
-        console.log("Key working:", key);
+      if (res.data.values) {
+        console.log("Success key:", key);
         return res.data;
       }
 
     } catch (err) {
-      console.log("Error with key:", key);
+      console.log("Error key:", key);
       continue;
     }
   }
-
   return null;
 }
 
@@ -87,22 +85,18 @@ app.get("/signal", checkKey, async (req, res) => {
     let symbol = req.query.symbol || "EUR/USD";
     symbol = symbol.replace("/", "");
 
-    // 🔥 CACHE (10 sec)
-    if (Date.now() - lastFetch < 10000 && cache) {
+    // 🔥 CACHE (15 sec)
+    if (Date.now() - lastFetch < 15000 && cache) {
       return res.json(cache);
     }
 
     const data = await fetchData(symbol);
 
-    if (!data || !data.values) {
-      return res.json({ error: "All API keys failed" });
+    if (!data) {
+      return res.json({ error: "All APIs failed" });
     }
 
     const closes = data.values.map(c => parseFloat(c.close)).reverse();
-
-    if (closes.length < 20) {
-      return res.json({ error: "Not enough data" });
-    }
 
     const ema10 = EMA(closes, 10);
     const ema20 = EMA(closes, 20);
@@ -112,6 +106,7 @@ app.get("/signal", checkKey, async (req, res) => {
     let trend = ema10 > ema20 ? "UP" : "DOWN";
     let signal = "WAIT";
 
+    // 🔥 IMPROVED LOGIC
     if (trend === "UP" && rsi < 45 && price > ema10) {
       signal = "UP 📈";
     } else if (trend === "DOWN" && rsi > 55 && price < ema10) {
@@ -120,21 +115,20 @@ app.get("/signal", checkKey, async (req, res) => {
 
     const result = { signal, rsi, price, trend };
 
-    // 💾 Save cache
     cache = result;
     lastFetch = Date.now();
 
     res.json(result);
 
   } catch (err) {
-    console.log("ERROR:", err.message);
+    console.log(err.message);
     res.json({ error: "Server error" });
   }
 });
 
-// Home route
+// Home
 app.get("/", (req, res) => {
-  res.send("AI Signal Bot Backend Running 🚀");
+  res.send("AI Signal Bot PRO Running 🚀");
 });
 
 app.listen(PORT, () => {
