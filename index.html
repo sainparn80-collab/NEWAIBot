@@ -1,20 +1,10 @@
+<select id="market">
+  <option value="BTCUSDT">BTC/USDT</option>
+  <option value="ETHUSDT">ETH/USDT</option>
+  <option value="BNBUSDT">BNB/USDT</option>
+</select>
+
 <script>
-let stake = 1;
-let wins = 0;
-let losses = 0;
-
-function saveKey() {
-  let key = document.getElementById("license").value;
-  localStorage.setItem("license", key);
-  alert("License Saved ✅");
-}
-
-document.getElementById("market").addEventListener("change", function() {
-  let symbol = this.value.replace("/", "");
-  document.getElementById("chart").src =
-  "https://s.tradingview.com/widgetembed/?symbol=FX:" + symbol + "&interval=1";
-});
-
 function getSignal() {
   let market = document.getElementById("market").value;
   let key = localStorage.getItem("license");
@@ -38,35 +28,13 @@ function getSignal() {
     document.getElementById("signal").innerText = data.signal;
 
     document.getElementById("extra").innerText =
-      "RSI: " + (data.rsi?.toFixed(2) || "-") +
-      " | Price: " + (data.price?.toFixed(5) || "-") +
-      " | Trend: " + (data.trend || "-");
+      "RSI: " + data.rsi.toFixed(2) +
+      " | Price: " + data.price.toFixed(2) +
+      " | Trend: " + data.trend;
 
   })
   .catch(() => {
-    alert("Backend Issues!");
+    alert("Backend Issue!");
   });
-}
-
-function win() {
-  wins++;
-  stake *= 2;
-  update();
-}
-
-function loss() {
-  losses++;
-  stake = 1;
-  update();
-}
-
-function update() {
-  document.getElementById("stake").innerText = stake;
-  document.getElementById("wins").innerText = wins;
-  document.getElementById("losses").innerText = losses;
-
-  let total = wins + losses;
-  let wr = total ? Math.round((wins / total) * 100) : 0;
-  document.getElementById("wr").innerText = wr + "%";
 }
 </script>
