@@ -8,7 +8,7 @@ app.use(cors());
 const PORT = process.env.PORT || 3000;
 const API_KEY = "26ef5347ec0e452392ef217536dc87cf";
 
-// 🔐 Fake DB (replace with MongoDB later)
+// 🔐 Fake DB
 let validKeys = ["VIP123", "PRO456"];
 
 // EMA
@@ -35,7 +35,7 @@ function RSI(prices, period = 14) {
   return 100 - (100 / (1 + rs));
 }
 
-// 🔐 License Middleware
+// 🔐 License check
 function checkKey(req, res, next) {
   const key = req.query.key;
   if (!validKeys.includes(key)) {
@@ -47,12 +47,25 @@ function checkKey(req, res, next) {
 // 🚀 SIGNAL API
 app.get("/signal", checkKey, async (req, res) => {
   try {
-    const symbol = req.query.symbol || "EUR/USD";
+    let symbol = req.query.symbol || "EUR/USD";
+
+    // 🔥 FIX: remove slash
+    symbol = symbol.replace("/", "");
 
     const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${API_KEY}`;
+
     const response = await axios.get(url);
 
+    // 🔥 SAFE CHECK
+    if (!response.data || !response.data.values) {
+      return res.json({ error: "API limit reached or invalid key" });
+    }
+
     const closes = response.data.values.map(c => parseFloat(c.close)).reverse();
+
+    if (closes.length < 20) {
+      return res.json({ error: "Not enough data" });
+    }
 
     const ema10 = EMA(closes, 10);
     const ema20 = EMA(closes, 20);
@@ -60,24 +73,27 @@ app.get("/signal", checkKey, async (req, res) => {
     const price = closes[closes.length - 1];
 
     let trend = ema10 > ema20 ? "UP" : "DOWN";
-
     let signal = "WAIT";
 
-    // 🔥 PRO LOGIC
     if (trend === "UP" && rsi < 45 && price > ema10) {
       signal = "UP 📈";
-    }
-    else if (trend === "DOWN" && rsi > 55 && price < ema10) {
+    } else if (trend === "DOWN" && rsi > 55 && price < ema10) {
       signal = "DOWN 📉";
     }
 
     res.json({ signal, rsi, price, trend });
 
   } catch (err) {
-    res.json({ error: "API error" });
+    console.log("ERROR:", err.message);
+    res.json({ error: "Server error or API issue" });
   }
 });
 
+// Home route
 app.get("/", (req, res) => {
   res.send("AI Signal Bot Backend Running 🚀");
+});
+
+app.listen(PORT, () => {
+  console.log("Server running...");
 });
