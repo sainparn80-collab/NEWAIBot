@@ -9,9 +9,9 @@ const PORT = process.env.PORT || 3000;
 
 // 🔑 ADD YOUR 3 API KEYS HERE
 const API_KEYS = [
-  "API_KEY_1",
-  "API_KEY_2",
-  "API_KEY_3"
+  "19df026300c34d19ab38381c6b9ccc0c",
+  "6460e5c6e8544998b96bea95fb9518b9",
+  "47314015f23043a784b5f5edc8e3acd4"
 ];
 
 // 🔐 License keys
