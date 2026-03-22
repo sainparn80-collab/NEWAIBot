@@ -145,7 +145,7 @@ function getSignal() {
 
   document.getElementById("signal").innerText = "Loading...";
 
-  fetch("http://newaibot-production.up.railway.app/signal?symbol=" + market + "&key=" + key)
+ fetch("https://newaibot-production.up.railway.app/signal?symbol=" + market + "&key=" + key)
   .then(res => res.json())
   .then(data => {
 
