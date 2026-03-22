@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const API_KEY = "26ef5347ec0e452392ef217536dc87cf";
 
 // 🔐 Fake DB (replace with MongoDB later)
