@@ -1,116 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Quotex Real Signal Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Signal Bot PRO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body {
-  background:#020617;
-  color:white;
-  text-align:center;
-  font-family:Arial;
-}
+  <style>
+    body {
+      font-family: Arial;
+      background: #020617;
+      color: white;
+      text-align: center;
+    }
 
-iframe {
-  width:100%;
-  height:260px;
-  border:none;
-  border-radius:10px;
-}
+    iframe {
+      width: 100%;
+      height: 260px;
+      border-radius: 10px;
+      border: none;
+    }
 
-select,button {
-  padding:12px;
-  margin:6px;
-  width:90%;
-  border-radius:10px;
-  border:none;
-}
+    select, button, input {
+      padding: 12px;
+      margin: 6px;
+      width: 90%;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
 
-button {
-  background:#4f46e5;
-  color:white;
-}
+    button {
+      background: linear-gradient(45deg,#4f46e5,#9333ea);
+      color: white;
+    }
 
-.card {
-  background:#0f172a;
-  padding:10px;
-  margin:10px;
-  border-radius:10px;
-}
+    .signal {
+      font-size: 26px;
+      margin: 10px;
+      font-weight: bold;
+    }
 
-.signal {
-  font-size:28px;
-  margin:10px;
-}
-</style>
+    .card {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h2>Quotex Real Signal Pro 🚀</h2>
+<h2>🚀 AI SIGNAL BOT PRO</h2>
 
+<!-- 🔐 LICENSE -->
+<div class="card">
+  <input id="license" placeholder="Enter License Key">
+  <button onclick="saveKey()">LOGIN</button>
+</div>
+
+<!-- 📊 CHART -->
 <iframe id="chart"
-src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1">
+src="https://s.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=1">
 </iframe>
 
 <div class="card">
 
+<!-- 📈 MARKET -->
 <select id="market">
-<option value="GBP/NZD">GBP/NZD (OTC)</option>
-<option value="EUR/NZD">EUR/NZD (OTC)</option>
-<option value="NZD/CHF">NZD/CHF (OTC)</option>
-<option value="NZD/USD">NZD/USD (OTC)</option>
-<option value="EUR/USD">EUR/USD</option>
-<option value="EUR/JPY">EUR/JPY</option>
-<option value="USD/PKR">USD/PKR (OTC)</option>
-<option value="AUD/JPY">AUD/JPY</option>
-<option value="GBP/USD">GBP/USD</option>
-<option value="USD/BRL">USD/BRL (OTC)</option>
-<option value="EUR/GBP">EUR/GBP</option>
-<option value="NZD/CAD">NZD/CAD (OTC)</option>
-<option value="USD/DZD">USD/DZD (OTC)</option>
-<option value="USD/IDR">USD/IDR (OTC)</option>
-<option value="AUD/USD">AUD/USD</option>
-<option value="EUR/AUD">EUR/AUD</option>
-<option value="GBP/JPY">GBP/JPY</option>
-<option value="USD/CAD">USD/CAD</option>
-<option value="USD/COP">USD/COP (OTC)</option>
-<option value="USD/JPY">USD/JPY</option>
-<option value="EUR/CAD">EUR/CAD</option>
-<option value="GBP/AUD">GBP/AUD</option>
-<option value="GBP/CAD">GBP/CAD</option>
-<option value="USD/CHF">USD/CHF</option>
-<option value="USD/INR">USD/INR (OTC)</option>
-<option value="AUD/CAD">AUD/CAD</option>
-<option value="AUD/CHF">AUD/CHF</option>
-<option value="USD/ZAR">USD/ZAR (OTC)</option>
-<option value="CAD/CHF">CAD/CHF (OTC)</option>
-<option value="CHF/JPY">CHF/JPY</option>
-<option value="USD/ARS">USD/ARS (OTC)</option>
-<option value="USD/BDT">USD/BDT (OTC)</option>
-<option value="USD/EGP">USD/EGP (OTC)</option>
-<option value="USD/MXN">USD/MXN (OTC)</option>
-<option value="USD/NGN">USD/NGN (OTC)</option>
-<option value="USD/PHP">USD/PHP (OTC)</option>
-<option value="NZD/JPY">NZD/JPY (OTC)</option>
-<option value="AUD/NZD">AUD/NZD (OTC)</option>
-<option value="EUR/CHF">EUR/CHF</option>
-<option value="GBP/CHF">GBP/CHF</option>
-<option value="EUR/SGD">EUR/SGD (OTC)</option>
+  <option value="GBPNZD">GBP/NZD (OTC)</option>
+  <option value="EURNZD">EUR/NZD (OTC)</option>
+  <option value="NZDCHF">NZD/CHF (OTC)</option>
+  <option value="NZDUSD">NZD/USD (OTC)</option>
+  <option value="EURUSD">EUR/USD</option>
+  <option value="EURJPY">EUR/JPY</option>
+  <option value="USDPKR">USD/PKR (OTC)</option>
+  <option value="AUDJPY">AUD/JPY</option>
+  <option value="GBPUSD">GBP/USD</option>
+  <option value="USDBRL">USD/BRL (OTC)</option>
+  <option value="EURGBP">EUR/GBP</option>
+  <option value="NZDCAD">NZD/CAD (OTC)</option>
+  <option value="USDDZD">USD/DZD (OTC)</option>
+  <option value="USDIDR">USD/IDR (OTC)</option>
+  <option value="AUDUSD">AUD/USD</option>
+  <option value="EURAUD">EUR/AUD</option>
+  <option value="GBPJPY">GBP/JPY</option>
+  <option value="USDCAD">USD/CAD</option>
+  <option value="USDCOP">USD/COP (OTC)</option>
+  <option value="USDJPY">USD/JPY</option>
+  <option value="EURCAD">EUR/CAD</option>
+  <option value="GBPAUD">GBP/AUD</option>
+  <option value="GBPCAD">GBP/CAD</option>
+  <option value="USDCHF">USD/CHF</option>
+  <option value="USDINR">USD/INR (OTC)</option>
+  <option value="AUDCAD">AUD/CAD</option>
+  <option value="AUDCHF">AUD/CHF</option>
+  <option value="USDZAR">USD/ZAR (OTC)</option>
+  <option value="CADCHF">CAD/CHF (OTC)</option>
+  <option value="CHFJPY">CHF/JPY</option>
+  <option value="USDARS">USD/ARS (OTC)</option>
+  <option value="USDBDT">USD/BDT (OTC)</option>
+  <option value="USDEGP">USD/EGP (OTC)</option>
+  <option value="USDMXN">USD/MXN (OTC)</option>
+  <option value="USDNGN">USD/NGN (OTC)</option>
+  <option value="USDPHP">USD/PHP (OTC)</option>
+  <option value="NZDJPY">NZD/JPY (OTC)</option>
+  <option value="AUDNZD">AUD/NZD (OTC)</option>
+  <option value="EURCHF">EUR/CHF</option>
+  <option value="GBPCHF">GBP/CHF</option>
+  <option value="EURSGD">EUR/SGD (OTC)</option>
 </select>
 
-<select>
-<option>5 sec</option>
-<option>10 sec</option>
-<option>15 sec</option>
-<option>30 sec</option>
-<option>1 min</option>
-<option>5 min</option>
-<option>10 min</option>
-<option>30 min</option>
-<option>1 hour</option>
-<option>5 hour</option>
+<!-- ⏱ TIME -->
+<select id="time">
+  <option>5 sec</option>
+  <option>10 sec</option>
+  <option>15 sec</option>
+  <option>30 sec</option>
+  <option>1 min</option>
 </select>
 
 <button onclick="getSignal()">GET SIGNAL</button>
@@ -122,34 +128,54 @@ src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1">
 
 <script>
 
-// chart update
-document.getElementById("market").addEventListener("change", function(){
-  let symbol = this.value.replace("/","");
+// 🔐 SAVE LICENSE
+function saveKey() {
+  let key = document.getElementById("license").value;
+  localStorage.setItem("license", key);
+  alert("License Saved ✅");
+}
+
+// 📊 CHANGE CHART
+document.getElementById("market").addEventListener("change", function() {
+  let symbol = this.value;
   document.getElementById("chart").src =
-  "https://s.tradingview.com/widgetembed/?symbol=FX:"+symbol+"&interval=1";
+  "https://s.tradingview.com/widgetembed/?symbol=BINANCE:" + symbol + "&interval=1";
 });
 
-// signal
-function getSignal(){
+// 🚀 GET SIGNAL
+function getSignal() {
+
   let market = document.getElementById("market").value;
+  let key = localStorage.getItem("license");
+
+  if (!key) {
+    alert("Enter License Key First!");
+    return;
+  }
 
   document.getElementById("signal").innerText = "Loading...";
 
-  fetch("https://newaibot-production.up.railway.app/signal?symbol="+market)
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.error){
-      document.getElementById("signal").innerText="API Error";
+  fetch("https://newaibot-production.up.railway.app/signal?symbol=" + market + "&key=" + key)
+  .then(res => res.json())
+  .then(data => {
+
+    if (!data || data.error) {
+      document.getElementById("signal").innerText = "❌ Error";
       return;
     }
 
-    document.getElementById("signal").innerText=data.signal;
+    document.getElementById("signal").innerText = data.signal;
+
     document.getElementById("extra").innerText =
-    "RSI: "+data.rsi.toFixed(2)+" | Price: "+data.price;
+      "RSI: " + data.rsi.toFixed(2) +
+      " | Price: " + data.price.toFixed(2) +
+      " | Trend: " + data.trend;
+
   })
-  .catch(()=>{
-    document.getElementById("signal").innerText="Backend Error";
+  .catch(() => {
+    document.getElementById("signal").innerText = "⚠️ Server Issue";
   });
+
 }
 
 </script>
