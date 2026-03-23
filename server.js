@@ -1,168 +1,82 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>AI Signal Bot PRO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #020617;
-      color: white;
-      text-align: center;
+const app = express();
+app.use(cors());
+
+const PORT = 3000;
+const API_KEY = "26ef5347ec0e452392ef217536dc87cf";
+
+// EMA
+function calculateEMA(prices, period) {
+  let k = 2 / (period + 1);
+  let ema = prices[0];
+  for (let i = 1; i < prices.length; i++) {
+    ema = prices[i] * k + ema * (1 - k);
+  }
+  return ema;
+}
+
+// RSI
+function calculateRSI(prices, period = 14) {
+  let gains = 0, losses = 0;
+
+  for (let i = 1; i <= period; i++) {
+    let diff = prices[i] - prices[i - 1];
+    if (diff >= 0) gains += diff;
+    else losses -= diff;
+  }
+
+  let rs = gains / losses || 1;
+  return 100 - (100 / (1 + rs));
+}
+
+// ⚡ CACHE SYSTEM (FAST)
+let lastSignal = null;
+let lastTime = 0;
+
+// SIGNAL API
+app.get("/signal", async (req, res) => {
+  try {
+    const now = Date.now();
+
+    if (now - lastTime < 5000 && lastSignal) {
+      return res.json(lastSignal);
     }
 
-    iframe {
-      width: 100%;
-      height: 260px;
-      border-radius: 10px;
-      border: none;
-    }
+    const symbol = req.query.symbol || "EUR/USD";
 
-    select, button {
-      padding: 12px;
-      margin: 6px;
-      width: 90%;
-      border-radius: 10px;
-      border: none;
-      font-size: 16px;
-    }
+    const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1min&apikey=${API_KEY}`;
 
-    button {
-      background: linear-gradient(45deg,#4f46e5,#9333ea);
-      color: white;
-    }
+    const response = await axios.get(url);
+    const data = response.data.values;
 
-    .win { background: #16a34a; }
-    .loss { background: #dc2626; }
+    const closes = data.map(c => parseFloat(c.close)).reverse();
 
-    .signal {
-      font-size: 26px;
-      margin: 10px;
-    }
+    const ema = calculateEMA(closes, 10);
+    const rsi = calculateRSI(closes, 14);
+    const price = closes[closes.length - 1];
 
-    .card {
-      background: #0f172a;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 10px;
-    }
-  </style>
-</head>
+    let signal = "WAIT";
 
-<body>
+    // 🔥 IMPROVED LOGIC (LESS WAIT + SMART)
+    if (rsi < 40) signal = "UP 📈";
+    else if (rsi > 60) signal = "DOWN 📉";
 
-<h1>MASTER QUOTEX SIGNAL 🚀</h1>
+    if (price > ema && rsi < 50) signal = "UP 📈";
+    if (price < ema && rsi > 50) signal = "DOWN 📉";
 
-<iframe id="chart"
-src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1"></iframe>
+    lastSignal = { signal, rsi, ema, price };
+    lastTime = now;
 
-<div class="card">
+    res.json(lastSignal);
 
-<select id="platform">
-  <option>Quotex</option>
-  <option>Pocket Option</option>
-  <option>Binomo</option>
-</select>
-
-<select id="market">
-  <option value="EUR/USD">EUR/USD</option>
-  <option value="GBP/USD">GBP/USD</option>
-  <option value="USD/JPY">USD/JPY</option>
-  <option value="AUD/USD">AUD/USD</option>
-  <option value="USD/CAD">USD/CAD</option>
-  <option value="USD/CHF">USD/CHF</option>
-  <option value="EUR/JPY">EUR/JPY</option>
-  <option value="GBP/JPY">GBP/JPY</option>
-  <option value="USD/BRL">USD/BRL (OTC)</option>
-  <option value="USD/INR">USD/INR (OTC)</option>
-  <option value="USD/PKR">USD/PKR (OTC)</option>
-</select>
-
-<select id="time">
-  <option>5 sec</option>
-  <option>10 sec</option>
-  <option>15 sec</option>
-  <option>30 sec</option>
-  <option>1 min</option>
-  <option>2 min</option>
-  <option>5 min</option>
-</select>
-
-<button onclick="getSignal()">GET SIGNAL</button>
-
-<div class="signal" id="signal">---</div>
-<div id="extra"></div>
-
-<h3>Stake: $<span id="stake">1</span></h3>
-
-<button class="win" onclick="win()">WIN</button>
-<button class="loss" onclick="loss()">LOSS</button>
-
-</div>
-
-<div class="card">
-  <h3>📊 Stats</h3>
-  Wins: <span id="wins">0</span> |
-  Loss: <span id="losses">0</span><br>
-  Win Rate: <span id="wr">0%</span>
-</div>
-
-<script>
-let stake = 1;
-let wins = 0;
-let losses = 0;
-
-// Chart update
-document.getElementById("market").addEventListener("change", function() {
-  let symbol = this.value.replace("/", "");
-  document.getElementById("chart").src =
-  "https://s.tradingview.com/widgetembed/?symbol=FX:" + symbol + "&interval=1";
+  } catch (err) {
+    res.json({ error: "API error" });
+  }
 });
 
-// GET SIGNAL
-function getSignal() {
-  let market = document.getElementById("market").value;
-
-  document.getElementById("signal").innerText = "Loading...";
-
-  fetch("http://127.0.0.1:3000/signal?symbol=" + market)
-  .then(res => res.json())
-  .then(data => {
-    document.getElementById("signal").innerText = data.signal;
-    document.getElementById("extra").innerText =
-      "RSI: " + data.rsi.toFixed(2) +
-      " | Price: " + data.price.toFixed(5);
-  })
-  .catch(() => {
-    alert("Backend connect nahi ho raha!");
-  });
-}
-
-// Win
-function win() {
-  wins++;
-  stake *= 2;
-  update();
-}
-
-// Loss
-function loss() {
-  losses++;
-  stake = 1;
-  update();
-}
-
-function update() {
-  document.getElementById("stake").innerText = stake;
-  document.getElementById("wins").innerText = wins;
-  document.getElementById("losses").innerText = losses;
-
-  let total = wins + losses;
-  let wr = total ? Math.round((wins / total) * 100) : 0;
-  document.getElementById("wr").innerText = wr + "%";
-}
-</script>
-
-</body>
-</html>
+app.listen(PORT, () => {
+  console.log("Server running on http://localhost:" + PORT);
+});
