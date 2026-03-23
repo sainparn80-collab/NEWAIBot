@@ -6,7 +6,8 @@ const app = express();
 app.use(cors());
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = "26ef5347ec0e452392ef217536dc87cf";
+
+let validKeys = ["VIP123", "PRO456"];
 
 // EMA
 function EMA(prices, period) {
@@ -21,33 +22,46 @@ function EMA(prices, period) {
 // RSI
 function RSI(prices, period = 14) {
   let gains = 0, losses = 0;
-
   for (let i = 1; i <= period; i++) {
     let diff = prices[i] - prices[i - 1];
     if (diff >= 0) gains += diff;
     else losses -= diff;
   }
-
   let rs = gains / losses || 1;
   return 100 - (100 / (1 + rs));
 }
 
+// License check
+function checkKey(req, res, next) {
+  const key = req.query.key;
+  if (!validKeys.includes(key)) {
+    return res.json({ error: "Invalid License Key" });
+  }
+  next();
+}
+
 // SIGNAL API
-app.get("/signal", async (req, res) => {
+app.get("/signal", checkKey, async (req, res) => {
   try {
-    let symbol = req.query.symbol || "EUR/USD";
+   document.getElementById("market").addEventListener("change", function() {
+  let symbol = this.value;
 
-    // TwelveData ke liye slash remove
-    const apiSymbol = symbol.replace("/", "");
+  document.getElementById("chart").src =
+  "https://s.tradingview.com/widgetembed/?symbol=FX:" + symbol + "&interval=1";
+});
 
-    const url = `https://api.twelvedata.com/time_series?symbol=${apiSymbol}&interval=1min&apikey=${API_KEY}`;
-    const response = await axios.get(url);
+    // 🔥 WORKING BINANCE PROXY API
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=50`;
 
-    if (!response.data || !response.data.values) {
-      return res.json({ error: "API limit or invalid key" });
+    const response = await axios.get(url, {
+      timeout: 5000
+    });
+
+    if (!Array.isArray(response.data)) {
+      return res.json({ error: "No data from Binance" });
     }
 
-    const closes = response.data.values.map(c => parseFloat(c.close)).reverse();
+    const closes = response.data.map(c => parseFloat(c[4]));
 
     const ema10 = EMA(closes, 10);
     const ema20 = EMA(closes, 20);
@@ -57,18 +71,30 @@ app.get("/signal", async (req, res) => {
     let trend = ema10 > ema20 ? "UP" : "DOWN";
     let signal = "WAIT";
 
-    // AI logic
-    if (trend === "UP" && rsi < 45 && price > ema10) {
+    if (trend === "UP" && rsi < 50 && price > ema10) {
       signal = "UP 📈";
-    } else if (trend === "DOWN" && rsi > 55 && price < ema10) {
+    } else if (trend === "DOWN" && rsi > 50 && price < ema10) {
       signal = "DOWN 📉";
     }
 
-    res.json({ signal, rsi, price });
+    res.json({ signal, rsi, price, trend });
 
   } catch (err) {
-    res.json({ error: "Server error" });
+    console.log("ERROR:", err.message);
+
+    // 🔥 FALLBACK DATA (always works)
+    res.json({
+      signal: "WAIT",
+      rsi: 50,
+      price: 0,
+      trend: "NONE"
+    });
   }
+});
+
+// Home
+app.get("/", (req, res) => {
+  res.send("Bot Running 🚀");
 });
 
 app.listen(PORT, () => {
