@@ -1,102 +1,168 @@
-const express = require("express");
-const axios = require("axios");
-const cors = require("cors");
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Signal Bot PRO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-const app = express();
-app.use(cors());
+  <style>
+    body {
+      font-family: Arial;
+      background: #020617;
+      color: white;
+      text-align: center;
+    }
 
-const PORT = process.env.PORT || 3000;
+    iframe {
+      width: 100%;
+      height: 260px;
+      border-radius: 10px;
+      border: none;
+    }
 
-let validKeys = ["VIP123", "PRO456"];
+    select, button {
+      padding: 12px;
+      margin: 6px;
+      width: 90%;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
 
-// EMA
-function EMA(prices, period) {
-  let k = 2 / (period + 1);
-  let ema = prices[0];
-  for (let i = 1; i < prices.length; i++) {
-    ema = prices[i] * k + ema * (1 - k);
-  }
-  return ema;
-}
+    button {
+      background: linear-gradient(45deg,#4f46e5,#9333ea);
+      color: white;
+    }
 
-// RSI
-function RSI(prices, period = 14) {
-  let gains = 0, losses = 0;
-  for (let i = 1; i <= period; i++) {
-    let diff = prices[i] - prices[i - 1];
-    if (diff >= 0) gains += diff;
-    else losses -= diff;
-  }
-  let rs = gains / losses || 1;
-  return 100 - (100 / (1 + rs));
-}
+    .win { background: #16a34a; }
+    .loss { background: #dc2626; }
 
-// License check
-function checkKey(req, res, next) {
-  const key = req.query.key;
-  if (!validKeys.includes(key)) {
-    return res.json({ error: "Invalid License Key" });
-  }
-  next();
-}
+    .signal {
+      font-size: 26px;
+      margin: 10px;
+    }
 
-// SIGNAL API
-app.get("/signal", checkKey, async (req, res) => {
-  try {
-   document.getElementById("market").addEventListener("change", function() {
-  let symbol = this.value;
+    .card {
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 10px;
+    }
+  </style>
+</head>
 
+<body>
+
+<h1>MASTER QUOTEX SIGNAL 🚀</h1>
+
+<iframe id="chart"
+src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1"></iframe>
+
+<div class="card">
+
+<select id="platform">
+  <option>Quotex</option>
+  <option>Pocket Option</option>
+  <option>Binomo</option>
+</select>
+
+<select id="market">
+  <option value="EUR/USD">EUR/USD</option>
+  <option value="GBP/USD">GBP/USD</option>
+  <option value="USD/JPY">USD/JPY</option>
+  <option value="AUD/USD">AUD/USD</option>
+  <option value="USD/CAD">USD/CAD</option>
+  <option value="USD/CHF">USD/CHF</option>
+  <option value="EUR/JPY">EUR/JPY</option>
+  <option value="GBP/JPY">GBP/JPY</option>
+  <option value="USD/BRL">USD/BRL (OTC)</option>
+  <option value="USD/INR">USD/INR (OTC)</option>
+  <option value="USD/PKR">USD/PKR (OTC)</option>
+</select>
+
+<select id="time">
+  <option>5 sec</option>
+  <option>10 sec</option>
+  <option>15 sec</option>
+  <option>30 sec</option>
+  <option>1 min</option>
+  <option>2 min</option>
+  <option>5 min</option>
+</select>
+
+<button onclick="getSignal()">GET SIGNAL</button>
+
+<div class="signal" id="signal">---</div>
+<div id="extra"></div>
+
+<h3>Stake: $<span id="stake">1</span></h3>
+
+<button class="win" onclick="win()">WIN</button>
+<button class="loss" onclick="loss()">LOSS</button>
+
+</div>
+
+<div class="card">
+  <h3>📊 Stats</h3>
+  Wins: <span id="wins">0</span> |
+  Loss: <span id="losses">0</span><br>
+  Win Rate: <span id="wr">0%</span>
+</div>
+
+<script>
+let stake = 1;
+let wins = 0;
+let losses = 0;
+
+// Chart update
+document.getElementById("market").addEventListener("change", function() {
+  let symbol = this.value.replace("/", "");
   document.getElementById("chart").src =
   "https://s.tradingview.com/widgetembed/?symbol=FX:" + symbol + "&interval=1";
 });
 
-    // 🔥 WORKING BINANCE PROXY API
-    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=50`;
+// GET SIGNAL
+function getSignal() {
+  let market = document.getElementById("market").value;
 
-    const response = await axios.get(url, {
-      timeout: 5000
-    });
+  document.getElementById("signal").innerText = "Loading...";
 
-    if (!Array.isArray(response.data)) {
-      return res.json({ error: "No data from Binance" });
-    }
+  fetch("http://127.0.0.1:3000/signal?symbol=" + market)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("signal").innerText = data.signal;
+    document.getElementById("extra").innerText =
+      "RSI: " + data.rsi.toFixed(2) +
+      " | Price: " + data.price.toFixed(5);
+  })
+  .catch(() => {
+    alert("Backend connect nahi ho raha!");
+  });
+}
 
-    const closes = response.data.map(c => parseFloat(c[4]));
+// Win
+function win() {
+  wins++;
+  stake *= 2;
+  update();
+}
 
-    const ema10 = EMA(closes, 10);
-    const ema20 = EMA(closes, 20);
-    const rsi = RSI(closes, 14);
-    const price = closes[closes.length - 1];
+// Loss
+function loss() {
+  losses++;
+  stake = 1;
+  update();
+}
 
-    let trend = ema10 > ema20 ? "UP" : "DOWN";
-    let signal = "WAIT";
+function update() {
+  document.getElementById("stake").innerText = stake;
+  document.getElementById("wins").innerText = wins;
+  document.getElementById("losses").innerText = losses;
 
-    if (trend === "UP" && rsi < 50 && price > ema10) {
-      signal = "UP 📈";
-    } else if (trend === "DOWN" && rsi > 50 && price < ema10) {
-      signal = "DOWN 📉";
-    }
+  let total = wins + losses;
+  let wr = total ? Math.round((wins / total) * 100) : 0;
+  document.getElementById("wr").innerText = wr + "%";
+}
+</script>
 
-    res.json({ signal, rsi, price, trend });
-
-  } catch (err) {
-    console.log("ERROR:", err.message);
-
-    // 🔥 FALLBACK DATA (always works)
-    res.json({
-      signal: "WAIT",
-      rsi: 50,
-      price: 0,
-      trend: "NONE"
-    });
-  }
-});
-
-// Home
-app.get("/", (req, res) => {
-  res.send("Bot Running 🚀");
-});
-
-app.listen(PORT, () => {
-  console.log("Server running...");
-});
+</body>
+</html>
