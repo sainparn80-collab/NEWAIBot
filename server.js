@@ -71,9 +71,9 @@ app.get("/signal", checkKey, async (req, res) => {
     let trend = ema10 > ema20 ? "UP" : "DOWN";
     let signal = "WAIT";
 
-    if (trend === "UP" && rsi < 45 && price > ema10) {
+    if (trend === "UP" && rsi < 50 && price > ema10) {
       signal = "UP 📈";
-    } else if (trend === "DOWN" && rsi > 55 && price < ema10) {
+    } else if (trend === "DOWN" && rsi > 50 && price < ema10) {
       signal = "DOWN 📉";
     }
 
