@@ -1,92 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI Signal Bot PRO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quotex Real Signal Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #020617;
-      color: white;
-      text-align: center;
-    }
+<style>
+body {
+  background:#020617;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
 
-    iframe {
-      width: 100%;
-      height: 260px;
-      border-radius: 10px;
-      border: none;
-    }
+iframe {
+  width:100%;
+  height:260px;
+  border:none;
+  border-radius:10px;
+}
 
-    select, button {
-      padding: 12px;
-      margin: 6px;
-      width: 90%;
-      border-radius: 10px;
-      border: none;
-      font-size: 16px;
-    }
+select,button {
+  padding:12px;
+  margin:6px;
+  width:90%;
+  border-radius:10px;
+  border:none;
+}
 
-    button {
-      background: linear-gradient(45deg,#4f46e5,#9333ea);
-      color: white;
-    }
+button {
+  background:#4f46e5;
+  color:white;
+}
 
-    .win { background: #16a34a; }
-    .loss { background: #dc2626; }
+.card {
+  background:#0f172a;
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+}
 
-    .signal {
-      font-size: 26px;
-      margin: 10px;
-    }
-
-    .card {
-      background: #0f172a;
-      padding: 10px;
-      border-radius: 10px;
-      margin: 10px;
-    }
-  </style>
+.signal {
+  font-size:28px;
+  margin:10px;
+}
+</style>
 </head>
 
 <body>
 
-<h1>MASTER QUOTEX SIGNAL 🚀</h1>
+<h2>Quotex Real Signal Pro 🚀</h2>
 
 <iframe id="chart"
-src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1"></iframe>
+src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1">
+</iframe>
 
 <div class="card">
 
-<select id="platform">
-  <option>Quotex</option>
-  <option>Pocket Option</option>
-  <option>Binomo</option>
-</select>
-
 <select id="market">
-  <option value="EUR/USD">EUR/USD</option>
-  <option value="GBP/USD">GBP/USD</option>
-  <option value="USD/JPY">USD/JPY</option>
-  <option value="AUD/USD">AUD/USD</option>
-  <option value="USD/CAD">USD/CAD</option>
-  <option value="USD/CHF">USD/CHF</option>
-  <option value="EUR/JPY">EUR/JPY</option>
-  <option value="GBP/JPY">GBP/JPY</option>
-  <option value="USD/BRL">USD/BRL (OTC)</option>
-  <option value="USD/INR">USD/INR (OTC)</option>
-  <option value="USD/PKR">USD/PKR (OTC)</option>
+<option value="GBP/NZD">GBP/NZD (OTC)</option>
+<option value="EUR/NZD">EUR/NZD (OTC)</option>
+<option value="NZD/CHF">NZD/CHF (OTC)</option>
+<option value="NZD/USD">NZD/USD (OTC)</option>
+<option value="EUR/USD">EUR/USD</option>
+<option value="EUR/JPY">EUR/JPY</option>
+<option value="USD/PKR">USD/PKR (OTC)</option>
+<option value="AUD/JPY">AUD/JPY</option>
+<option value="GBP/USD">GBP/USD</option>
+<option value="USD/BRL">USD/BRL (OTC)</option>
+<option value="EUR/GBP">EUR/GBP</option>
+<option value="NZD/CAD">NZD/CAD (OTC)</option>
+<option value="USD/DZD">USD/DZD (OTC)</option>
+<option value="USD/IDR">USD/IDR (OTC)</option>
+<option value="AUD/USD">AUD/USD</option>
+<option value="EUR/AUD">EUR/AUD</option>
+<option value="GBP/JPY">GBP/JPY</option>
+<option value="USD/CAD">USD/CAD</option>
+<option value="USD/COP">USD/COP (OTC)</option>
+<option value="USD/JPY">USD/JPY</option>
+<option value="EUR/CAD">EUR/CAD</option>
+<option value="GBP/AUD">GBP/AUD</option>
+<option value="GBP/CAD">GBP/CAD</option>
+<option value="USD/CHF">USD/CHF</option>
+<option value="USD/INR">USD/INR (OTC)</option>
+<option value="AUD/CAD">AUD/CAD</option>
+<option value="AUD/CHF">AUD/CHF</option>
+<option value="USD/ZAR">USD/ZAR (OTC)</option>
+<option value="CAD/CHF">CAD/CHF (OTC)</option>
+<option value="CHF/JPY">CHF/JPY</option>
+<option value="USD/ARS">USD/ARS (OTC)</option>
+<option value="USD/BDT">USD/BDT (OTC)</option>
+<option value="USD/EGP">USD/EGP (OTC)</option>
+<option value="USD/MXN">USD/MXN (OTC)</option>
+<option value="USD/NGN">USD/NGN (OTC)</option>
+<option value="USD/PHP">USD/PHP (OTC)</option>
+<option value="NZD/JPY">NZD/JPY (OTC)</option>
+<option value="AUD/NZD">AUD/NZD (OTC)</option>
+<option value="EUR/CHF">EUR/CHF</option>
+<option value="GBP/CHF">GBP/CHF</option>
+<option value="EUR/SGD">EUR/SGD (OTC)</option>
 </select>
 
-<select id="time">
-  <option>5 sec</option>
-  <option>10 sec</option>
-  <option>15 sec</option>
-  <option>30 sec</option>
-  <option>1 min</option>
-  <option>2 min</option>
-  <option>5 min</option>
+<select>
+<option>5 sec</option>
+<option>10 sec</option>
+<option>15 sec</option>
+<option>30 sec</option>
+<option>1 min</option>
+<option>5 min</option>
+<option>10 min</option>
+<option>30 min</option>
+<option>1 hour</option>
+<option>5 hour</option>
 </select>
 
 <button onclick="getSignal()">GET SIGNAL</button>
@@ -94,22 +118,41 @@ src="https://s.tradingview.com/widgetembed/?symbol=FX:EURUSD&interval=1"></ifram
 <div class="signal" id="signal">---</div>
 <div id="extra"></div>
 
-<h3>Stake: $<span id="stake">1</span></h3>
-
-<button class="win" onclick="win()">WIN</button>
-<button class="loss" onclick="loss()">LOSS</button>
-
 </div>
 
-<div class="card">
-  <h3>📊 Stats</h3>
-  Wins: <span id="wins">0</span> |
-  Loss: <span id="losses">0</span><br>
-  Win Rate: <span id="wr">0%</span>
-</div>
+<script>
 
-<!-- 🔥 JS FILE -->
-<script src="script.js"></script>
+// chart update
+document.getElementById("market").addEventListener("change", function(){
+  let symbol = this.value.replace("/","");
+  document.getElementById("chart").src =
+  "https://s.tradingview.com/widgetembed/?symbol=FX:"+symbol+"&interval=1";
+});
+
+// signal
+function getSignal(){
+  let market = document.getElementById("market").value;
+
+  document.getElementById("signal").innerText = "Loading...";
+
+  fetch("https://newaibot-production.up.railway.app/signal?symbol="+market)
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.error){
+      document.getElementById("signal").innerText="API Error";
+      return;
+    }
+
+    document.getElementById("signal").innerText=data.signal;
+    document.getElementById("extra").innerText =
+    "RSI: "+data.rsi.toFixed(2)+" | Price: "+data.price;
+  })
+  .catch(()=>{
+    document.getElementById("signal").innerText="Backend Error";
+  });
+}
+
+</script>
 
 </body>
 </html>
