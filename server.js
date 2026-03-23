@@ -43,8 +43,12 @@ function checkKey(req, res, next) {
 // SIGNAL API
 app.get("/signal", checkKey, async (req, res) => {
   try {
-    let symbol = req.query.symbol || "BTCUSDT";
-    symbol = symbol.replace("/", "");
+   document.getElementById("market").addEventListener("change", function() {
+  let symbol = this.value;
+
+  document.getElementById("chart").src =
+  "https://s.tradingview.com/widgetembed/?symbol=FX:" + symbol + "&interval=1";
+});
 
     // 🔥 WORKING BINANCE PROXY API
     const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1m&limit=50`;
